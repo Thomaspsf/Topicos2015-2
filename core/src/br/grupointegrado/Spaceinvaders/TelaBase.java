@@ -1,0 +1,19 @@
+package br.grupointegrado.Spaceinvaders;
+
+import com.badlogic.gdx.Screen;
+
+/**
+ * Created by Thomas on 03/08/2015.
+ */
+public abstract class TelaBase implements Screen {
+
+    protected MainGame game;
+
+    public TelaBase(MainGame game){
+        this.game = game;
+    }
+    @Override
+    public void hide() {
+        dispose();
+    }
+}
