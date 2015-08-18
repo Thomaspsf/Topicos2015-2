@@ -36,7 +36,7 @@ public class TelaJogo extends  TelaBase {
     private boolean indoDireita;
     private boolean indoEsquerda;
     private boolean atirando;
-    private Array<Image> tiros = new Array<>();
+    private Array<Image> tiros = new Array<Image>();
     private Texture texturatiro;
     private Texture texturameteoro1;
     private Texture texturameteoro2;
@@ -177,12 +177,12 @@ public class TelaJogo extends  TelaBase {
             }
 
         }
-        float velocidade = 200;//velocidade do movimento do tiro
+        float velocidade = 100;//velocidade do movimento do tiro
         //percorre todos os tiros
         for (Image tiro : tiros){
             //movimanta o tiro em direção ao topo
             float x = tiro.getX();
-            float y = tiro.getY() + velocidade + delta;
+            float y = tiro.getY() + velocidade * delta;
             tiro.setPosition(x,y);
             //remove os tiro que sairem da tela
             if (tiro.getY() > camera.viewportHeight){
@@ -244,7 +244,7 @@ public class TelaJogo extends  TelaBase {
             indoDireita = true;
         }
         if (Gdx.input.isKeyPressed(Input.Keys.SPACE)){
-
+            atirando = true;
         }
     }
 
