@@ -2,6 +2,8 @@ package br.grupointegrado.Spaceinvaders;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -49,6 +51,11 @@ public class TelaJogo extends  TelaBase {
     private Array<Texture> texturasExplosao = new Array<Texture>();
     private Array<Explosao> explosoes = new Array<Explosao>();
 
+    private Sound somTiro;
+    private Sound somExplosao;
+    private Sound somGameOver;
+    private Music musicaFundo;
+
     /**
      * contrutor padrão da tela de jogo
      * @param game Referencia para a classe principal
@@ -70,7 +77,16 @@ public class TelaJogo extends  TelaBase {
         initFonte();
         initInformacoes();
         initJogador();
+        initSons();
 
+    }
+
+    private void initSons() {
+        somTiro = Gdx.audio.newSound(Gdx.files.internal("sounds/shoot.mp3"));
+        somExplosao = Gdx.audio.newSound(Gdx.files.internal("sounds/explosion.mp3"));
+        somGameOver = Gdx.audio.newSound(Gdx.files.internal("sounds/gameover.mp3"));
+        musicaFundo = Gdx.audio.newMusic(Gdx.files.internal("sounds/background.mp3"));
+        musicaFundo.setLooping(true);
     }
 
     private void initTexturas() {
@@ -153,12 +169,17 @@ public class TelaJogo extends  TelaBase {
 
         atualizarExplosoes(delta);
         if (gameOver == false) {// se o meteoro tiver colisao com o jogador o jogo para
+            if (!musicaFundo.isPlaying())
+                musicaFundo.play();
             capturateclas();
             atualizarJogador(delta);
             atualizarTiros(delta);
             atualizarMeteoros(delta);
             detectarColisoes(meteoro1, 5);
             detectarColisoes(meteoro2, 10);
+        }else{
+            if (musicaFundo.isPlaying())
+                musicaFundo.stop();
         }
 
 
@@ -204,7 +225,7 @@ public class TelaJogo extends  TelaBase {
                     tiros.removeValue(tiro, true);//remove da lista
                     meteoro.remove();// remove do palco
                     meteoros.removeValue(meteoro, true);//remove da lista
-                    criarExplosao(meteoro.getX(), meteoro.getY());
+                    criarExplosao(meteoro.getX() + meteoro.getWidth() / 2, meteoro.getY() + meteoro.getHeight() / 2);
                 }
 
 
@@ -213,6 +234,7 @@ public class TelaJogo extends  TelaBase {
             if (recJogador.overlaps(recMetodo)){
                 //ocorre colisao do jogador com meteoro
                 gameOver = true;
+                somGameOver.play();
 
 
             }
@@ -227,11 +249,12 @@ public class TelaJogo extends  TelaBase {
 
     private void criarExplosao(float x, float y) {
         Image ator = new Image(texturasExplosao.get(0));
-        ator.setPosition(x, y);
+        ator.setPosition(x - ator.getWidth() /2, y - ator.getHeight() /2  );
         palco.addActor(ator);
 
         Explosao explosao = new Explosao(ator, texturasExplosao);
         explosoes.add(explosao);
+        somExplosao.play();
 
 
     }
@@ -284,7 +307,7 @@ public class TelaJogo extends  TelaBase {
         }
     }
 
-    private final float min_intervalo_tiros = 0.5f;//minimo de tempo entre os tiros
+    private final float min_intervalo_tiros = 0.4f;//minimo de tempo entre os tiros
     private  float intervaloTiros = 0;// tempo acumulado entre as tiros
 
 
@@ -300,10 +323,11 @@ public class TelaJogo extends  TelaBase {
                 tiros.add(tiro);
                 palco.addActor(tiro);
                 intervaloTiros = 0;
+                somTiro.play();
             }
 
         }
-        float velocidade = 150;//velocidade do movimento do tiro
+        float velocidade = 200;//velocidade do movimento do tiro
         //percorre todos os tiros
         for (Image tiro : tiros){
             //movimanta o tiro em direção ao topo
@@ -419,5 +443,9 @@ public class TelaJogo extends  TelaBase {
         for (Texture text : texturasExplosao){
             text.dispose();
         }
+        somExplosao.dispose();
+        somExplosao.dispose();
+        somGameOver.dispose();
+        musicaFundo.dispose();
     }
 }
