@@ -1,7 +1,9 @@
 package br.grupointegrado.Spaceinvaders;
 
+import com.badlogic.gdx.Application;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
@@ -14,6 +16,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
@@ -21,6 +24,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.SpriteDrawable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.FillViewport;
 
+import java.util.Vector;
 
 
 /**
@@ -180,6 +184,7 @@ public class TelaJogo extends  TelaBase {
         }else{
             if (musicaFundo.isPlaying())
                 musicaFundo.stop();
+            reiniciarJogo();
         }
 
 
@@ -190,6 +195,23 @@ public class TelaJogo extends  TelaBase {
 
         palcoInformacoes.act(delta);
         palcoInformacoes.draw();
+    }
+
+    /**
+     * verifica so o usuario pressionou ENTER para reiniciar o jogo
+     */
+    private void reiniciarJogo() {
+        if (Gdx.input.isKeyJustPressed(Input.Keys.ENTER)) {
+
+            Preferences preferencias = Gdx.app.getPreferences("SpaceInvader");
+            int pontuacaoMaxima = preferencias.getInteger("pontuacao_maxima", 0);
+            if (pontuacao > pontuacaoMaxima) {
+
+                preferencias.putInteger("pontuacao_maxima", pontuacao);
+                preferencias.flush();
+            }
+            game.setScreen(new TelaMenu(game));
+        }
     }
 
     private void atualizarExplosoes(float delta) {
@@ -292,6 +314,7 @@ public class TelaJogo extends  TelaBase {
             if (meteoro.getY() + meteoro.getHeight() < 0){
                 meteoro.remove();//remove do palco
                 meteoro1.removeValue(meteoro, true);//remove da lista
+                pontuacao = pontuacao - 30;
             }
 
         }
@@ -303,6 +326,7 @@ public class TelaJogo extends  TelaBase {
             if (meteoro.getY() + meteoro.getHeight() < 0) {
                 meteoro.remove();//remove do palco
                 meteoro2.removeValue(meteoro, true);//remove da lista
+                pontuacao = pontuacao - 60;
             }
         }
     }
@@ -387,15 +411,49 @@ public class TelaJogo extends  TelaBase {
         indoEsquerda = false;
         atirando = false;
 
-        if (Gdx.input.isKeyPressed(Input.Keys.LEFT)){
+        if (Gdx.input.isKeyPressed(Input.Keys.LEFT) || clicouEsquerda()){
             indoEsquerda = true;
         }
-        if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)){
+        if (Gdx.input.isKeyPressed(Input.Keys.RIGHT) || clicouDireita()){
             indoDireita = true;
         }
-        if (Gdx.input.isKeyPressed(Input.Keys.SPACE)){
+        if (Gdx.input.isKeyPressed(Input.Keys.SPACE) || Gdx.app.getType() == Application.ApplicationType.Android){
             atirando = true;
         }
+    }
+
+    private boolean clicouEsquerda() {
+        if (Gdx.input.isTouched()){
+        Vector3 posicao = new Vector3();
+        //captura clique ou toque na janela do windows
+        posicao.x = Gdx.input.getX();
+        posicao.y = Gdx.input.getY();
+
+        posicao = camera.unproject(posicao);
+        float meio = camera.viewportWidth / 2;
+
+        if (posicao.x < meio) {
+            return true;
+        }
+        }
+        return false;
+    }
+
+    private boolean clicouDireita() {
+        if (Gdx.input.isTouched()){
+            Vector3 posicao = new Vector3();
+            //captura clique ou toque na janela do windows
+            posicao.x = Gdx.input.getX();
+            posicao.y = Gdx.input.getY();
+
+            posicao = camera.unproject(posicao);
+            float meio = camera.viewportWidth / 2;
+
+            if (posicao.x > meio) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
